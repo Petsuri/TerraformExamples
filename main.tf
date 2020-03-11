@@ -84,8 +84,9 @@ resource "aws_lb_listener_rule" "asg" {
   priority     = 100
 
   condition {
-    field  = "path-pattern"
-    values = ["*"]
+    path_pattern {
+      values = ["*"]
+    }
   }
 
   action {
@@ -132,6 +133,8 @@ resource "aws_autoscaling_group" "example" {
 
   min_size = 2
   max_size = 10
+
+  desired_capacity = 2
 
   tag {
     key                 = "Name"
