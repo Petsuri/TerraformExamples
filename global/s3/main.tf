@@ -15,6 +15,8 @@ resource "aws_s3_bucket" "terraform_state" {
     enabled = true
   }
 
+  region = "us-east-2"
+
   # Enable server-side encryption by default
   server_side_encryption_configuration {
     rule {
@@ -26,7 +28,7 @@ resource "aws_s3_bucket" "terraform_state" {
 }
 
 resource "aws_dynamodb_table" "terraform_locks" {
-  name         = "terraform-up-and-running-locks"
+  name         = "terraform-up-and-running-locks-petsuri"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "LockID"
 
@@ -36,23 +38,21 @@ resource "aws_dynamodb_table" "terraform_locks" {
   }
 }
 
+resource "aws_instance" "example" {
+  ami           = "ami-0c55b159cbfafe1f0"
+  instance_type = terraform.workspace == "default" ? "t2.micro" : "t2.micro"
+}
+
+
+# Partial configuration. The other settings (e.g. bucket, region) will be passed in from a file
+# via -backend-config arguments to 'terraform init'
 terraform {
   backend "s3" {
     bucket = "terraform-up-and-running-state-petsuri"
-    key    = "global/s3/terraform.tfstate"
+    key    = "workspaces-example/terraform.tfstate"
     region = "us-east-2"
 
-    dynamodb_table = "terraform-up-and-running-locks"
+    dynamodb_table = "terraform-up-and-running-locks-petsuri"
     encrypt        = true
   }
-}
-
-output "s3_bucket_arn" {
-  value       = aws_s3_bucket.terraform_state.arn
-  description = "The ARN of the S3 bucket"
-}
-
-output "dynamodb_table_name" {
-  value       = aws_dynamodb_table.terraform_locks.name
-  description = "The name of the DynamoDB table"
 }

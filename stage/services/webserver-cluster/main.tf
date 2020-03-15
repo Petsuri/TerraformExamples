@@ -2,12 +2,6 @@ provider "aws" {
   region = "us-east-2"
 }
 
-variable "server_port" {
-  description = "The port the server will use for HTTP requests"
-  type        = number
-  default     = 8080
-}
-
 data "aws_vpc" "default" {
   default = true
 }
@@ -141,10 +135,4 @@ resource "aws_autoscaling_group" "example" {
     value               = "terraform-asg-example"
     propagate_at_launch = true
   }
-}
-
-
-output "alb_dns_name" {
-  value       = aws_lb.example.dns_name
-  description = "The domain name of the load balancer"
 }
