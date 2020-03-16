@@ -1,3 +1,11 @@
+locals {
+  http_port    = 80
+  any_port     = 0
+  any_protocol = "-1"
+  tcp_protocol = "tpc"
+  all_ips      = ["0.0.0.0/0"]
+}
+
 data "aws_vpc" "default" {
   default = true
 }
@@ -17,7 +25,7 @@ data "terraform_remote_state" "db" {
 }
 
 data "template_file" "user_data" {
-  template = file("user-data.sh")
+  template = file("${path.module}/user-data.sh")
 
   vars = {
     server_port = var.server_port
@@ -31,17 +39,17 @@ resource "aws_security_group" "alb" {
 
   #allow inbound HTTP requests
   ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port   = local.http_port
+    to_port     = local.http_port
+    protocol    = local.tcp_protocol
+    cidr_blocks = local.all_ips
   }
 
   egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port   = local.any_port
+    to_port     = local.any_port
+    protocol    = local.any_protocol
+    cidr_blocks = local.all_ips
   }
 
 }
@@ -55,7 +63,7 @@ resource "aws_lb" "example" {
 
 resource "aws_lb_listener" "http" {
   load_balancer_arn = aws_lb.example.arn
-  port              = 80
+  port              = local.http_port
   protocol          = "HTTP"
 
   #by default, return as simple 404 page
@@ -118,7 +126,7 @@ resource "aws_security_group" "instance" {
 
 resource "aws_launch_configuration" "example" {
   image_id        = "ami-0c55b159cbfafe1f0"
-  instance_type   = "t2.micro"
+  instance_type   = var.instance_type
   security_groups = [aws_security_group.instance.id]
 
   user_data = data.template_file.user_data.rendered
@@ -137,14 +145,14 @@ resource "aws_autoscaling_group" "example" {
   target_group_arns = [aws_lb_target_group.asg.arn]
   health_check_type = "ELB"
 
-  min_size = 2
-  max_size = 10
+  min_size = var.min_size
+  max_size = var.max_size
 
-  desired_capacity = 2
+  desired_capacity = var.min_size
 
   tag {
     key                 = "Name"
-    value               = "${var.cluster_name}-example"
+    value               = var.cluster_name
     propagate_at_launch = true
   }
 }
