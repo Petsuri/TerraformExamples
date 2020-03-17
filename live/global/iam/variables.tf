@@ -3,3 +3,8 @@ variable "user_names" {
   type        = list(string)
   default     = ["Petsuri", "Mei", "Arnold"]
 }
+
+variable "give_petsuri_cloudwatch_full_access" {
+  description = "If true, Petsuri gets full access to CloudWatch"
+  type        = bool
+}
