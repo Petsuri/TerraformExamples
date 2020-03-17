@@ -25,12 +25,24 @@ data "terraform_remote_state" "db" {
 }
 
 data "template_file" "user_data" {
+  count = var.enable_new_user_data ? 0 : 1
+
   template = file("${path.module}/user-data.sh")
 
   vars = {
     server_port = var.server_port
     db_address  = data.terraform_remote_state.db.outputs.address
     db_port     = data.terraform_remote_state.db.outputs.port
+  }
+}
+
+data "template_file" "user_data_new" {
+  count = var.enable_new_user_data ? 1 : 0
+
+  template = file("${path.module}/user-data-new.sh")
+
+  vars = {
+    server_port = var.server_port
   }
 }
 
@@ -132,7 +144,11 @@ resource "aws_launch_configuration" "example" {
   instance_type   = var.instance_type
   security_groups = [aws_security_group.instance.id]
 
-  user_data = data.template_file.user_data.rendered
+  user_data = (
+    0 < length(data.template_file.user_data[*])
+    ? data.template_file.user_data[0].rendered
+    : data.template_file.user_data_new[0].rendered
+  )
 
   # Required when using a launch configuration with an auto scaling group
   # https://www.terraform.io/docs/providers/aws/r/launch_configuration.html
