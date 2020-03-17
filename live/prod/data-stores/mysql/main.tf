@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 module "mysql" {
-  source = "../../../modules/data-stores/mysql"
+  source = "../../../../modules/data-stores/mysql"
 
   db_password            = ""
   cluster_name           = "webserversprod"
