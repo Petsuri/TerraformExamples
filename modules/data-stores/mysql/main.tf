@@ -1,3 +1,8 @@
+terraform {
+  # Require any 0.12.x version of terraform
+  required_version = ">= 0.12, < 0.13"
+}
+
 resource "aws_db_instance" "example" {
   identifier_prefix   = "terraform-up-and-running"
   engine              = "mysql"

@@ -1,8 +1,12 @@
+terraform {
+  # Require any 0.12.x version of terraform
+  required_version = ">= 0.12, < 0.13"
+}
+
 locals {
   tcp_protocol = "tcp"
   all_ips      = ["0.0.0.0/0"]
 }
-
 
 resource "aws_security_group" "cluster_instance" {
   name = "${var.cluster_name}-instance"
@@ -17,7 +21,6 @@ resource "aws_security_group_rule" "allow_server_http_inbound" {
   protocol    = local.tcp_protocol
   cidr_blocks = local.all_ips
 }
-
 
 resource "aws_launch_configuration" "example" {
   image_id        = var.ami
