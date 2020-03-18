@@ -1,22 +1,17 @@
-
 variable "server_port" {
   description = "The port the server will use for HTTP requests"
   type        = number
   default     = 8080
 }
 
+variable "ami" {
+  description = "The AMI to run in the cluster"
+  default     = "ami-0c55b159cbfafe1f0"
+  type        = string
+}
+
 variable "cluster_name" {
   description = "The name to use for all the cluster resources"
-  type        = string
-}
-
-variable "db_remote_state_bucket" {
-  description = "The name of the S3 bucket for the database's remote state"
-  type        = string
-}
-
-variable "db_remote_state_key" {
-  description = "The path for the database's remote state in S3"
   type        = string
 }
 
@@ -46,14 +41,25 @@ variable "enable_autoscaling" {
   type        = bool
 }
 
-variable "ami" {
-  description = "The AMI to run in the cluster"
-  default     = "ami-0c55b159cbfafe1f0"
-  type        = string
+variable "subnet_ids" {
+  description = "The subnet IDs to deploy to"
+  type        = list(string)
 }
 
-variable "server_text" {
-  description = "The text the web server should return"
-  default     = "Hello, Petsuri"
+variable "target_group_arns" {
+  description = "The ARNs of ELB target groups in which to register Instaces"
+  type        = list(string)
+  default     = []
+}
+
+variable "health_check_type" {
+  description = "The type of health check to perform. Must be one of: EC2, ELB."
   type        = string
+  default     = "EC2"
+}
+
+variable "user_data" {
+  description = "The User Data script to run in each Instance at boot"
+  type        = string
+  default     = null
 }

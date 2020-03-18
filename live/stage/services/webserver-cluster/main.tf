@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 module "webserver_cluster" {
-  source = "../../../../modules/services/webserver-cluster"
+  source = "../../../../modules/services/hello-world-app"
 
   ami         = "ami-0c55b159cbfafe1f0"
   server_text = "Petsuri's new server"
