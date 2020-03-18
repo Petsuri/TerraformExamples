@@ -6,7 +6,9 @@ provider "aws" {
 }
 
 module "webserver_cluster" {
-  source = "../../../../modules/services/hello-world-app"
+  #source = "../../../../modules/services/hello-world-app"
+
+  source = "github.com/Petsuri/TerraformExamples//modules/services/hello-world-app?ref=v0.0.5"
 
   ami         = "ami-0c55b159cbfafe1f0"
   server_text = "Petsuri's new server"

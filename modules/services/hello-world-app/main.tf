@@ -29,8 +29,6 @@ module "alb" {
   subnet_ids = data.aws_subnet_ids.default.ids
 }
 
-
-
 data "aws_vpc" "default" {
   default = true
 }
