@@ -16,7 +16,7 @@ module "asg" {
   enable_autoscaling = var.enable_autoscaling
 
   subnet_ids        = data.aws_subnet_ids.default.ids
-  target_group_arns = [aws_lb_target_group.arg.arn]
+  target_group_arns = [aws_lb_target_group.asg.arn]
   health_check_type = "ELB"
 
   custom_tags = var.custom_tags
@@ -51,7 +51,7 @@ data "template_file" "user_data" {
   template = file("${path.module}/user-data.sh")
 
   vars = {
-    server_port = var.server_port
+    server_port = module.asg.server_port
     db_address  = data.terraform_remote_state.db.outputs.address
     db_port     = data.terraform_remote_state.db.outputs.port
     server_text = var.server_text
@@ -60,7 +60,7 @@ data "template_file" "user_data" {
 
 resource "aws_lb_target_group" "asg" {
   name     = "hello-world-${var.environment}"
-  port     = var.server_port
+  port     = module.asg.server_port
   protocol = "HTTP"
   vpc_id   = data.aws_vpc.default.id
 
