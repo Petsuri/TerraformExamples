@@ -35,13 +35,13 @@ data "template_file" "user_data" {
   }
 }
 
-resource "aws_security_group" "instance" {
+resource "aws_security_group" "cluster_instance" {
   name = "${var.cluster_name}-instance"
 }
 
 resource "aws_security_group_rule" "allow_server_http_inbound" {
   type              = "ingress"
-  security_group_id = aws_security_group.instance.id
+  security_group_id = aws_security_group.cluster_instance.id
 
   from_port   = var.server_port
   to_port     = var.server_port
@@ -135,7 +135,7 @@ resource "aws_lb_listener_rule" "asg" {
 resource "aws_launch_configuration" "example" {
   image_id        = var.ami
   instance_type   = var.instance_type
-  security_groups = [aws_security_group.instance.id]
+  security_groups = [aws_security_group.cluster_instance.id]
 
   user_data = data.template_file.user_data.rendered
 
