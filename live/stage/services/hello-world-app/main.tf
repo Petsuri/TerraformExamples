@@ -5,7 +5,7 @@ provider "aws" {
   version = "~> 2.0"
 }
 
-module "webserver_cluster" {
+module "hello_world_app" {
   #source = "../../../../modules/services/hello-world-app"
 
   source = "github.com/Petsuri/TerraformExamples//modules/services/hello-world-app?ref=v0.0.52"

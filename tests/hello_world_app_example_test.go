@@ -6,33 +6,33 @@ import (
 	"time"
 
 	http_helper "github.com/gruntwork-io/terratest/modules/http-helper"
-	"github.com/gruntwork-io/terratest/modules/random"
 	"github.com/gruntwork-io/terratest/modules/terraform"
 )
 
-func TestAlbExample(t *testing.T) {
+func TestHelloWorldAppExample(t *testing.T) {
 	t.Parallel()
 
 	options := &terraform.Options{
-		TerraformDir: "../examples/alb",
+		TerraformDir: "../examples/hello-world-app",
 		Vars: map[string]interface{}{
-			"alb_name": fmt.Sprintf("test-%s", random.UniqueId()),
+			"mysql_config": map[string]interface{}{
+				"address": "mock-value-for-test",
+				"port":    3306,
+			},
 		},
 	}
 
-	// Clean up everything at the end of the test
+	//Clean up everything at the end of the test
 	defer terraform.Destroy(t, options)
-
-	// Deploy the example
 	terraform.InitAndApply(t, options)
 
-	// Get the URL of the ALB
 	albDnsName := terraform.OutputRequired(t, options, "alb_dns_name")
 	url := fmt.Sprintf("http://%s", albDnsName)
 
-	// Test that the ALB's default action is working and returns a 404
-	expectedStatus := 404
-	expectedBody := "404: page not found"
+	expectedStatus := 200
+	expectedBody := `<h1>Hello, Petsuri</h1>
+<p>DB address: mock-value-for-test</p>
+<p>DB port: 3306</p>`
 
 	maxRetries := 10
 	timeBetweenRetries := 10 * time.Second
@@ -44,5 +44,6 @@ func TestAlbExample(t *testing.T) {
 		expectedStatus,
 		expectedBody,
 		maxRetries,
-		timeBetweenRetries)
+		timeBetweenRetries,
+	)
 }

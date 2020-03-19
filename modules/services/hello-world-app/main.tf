@@ -15,7 +15,7 @@ module "asg" {
   max_size           = var.max_size
   enable_autoscaling = var.enable_autoscaling
 
-  subnet_ids        = data.aws_subnet_ids.default.ids
+  subnet_ids        = local.subnet_ids
   target_group_arns = [aws_lb_target_group.asg.arn]
   health_check_type = "ELB"
 
@@ -26,25 +26,7 @@ module "alb" {
   source = "../../networking/alb"
 
   alb_name   = "hello-world-${var.environment}"
-  subnet_ids = data.aws_subnet_ids.default.ids
-}
-
-data "aws_vpc" "default" {
-  default = true
-}
-
-data "aws_subnet_ids" "default" {
-  vpc_id = data.aws_vpc.default.id
-}
-
-data "terraform_remote_state" "db" {
-  backend = "s3"
-
-  config = {
-    bucket = var.db_remote_state_bucket
-    key    = var.db_remote_state_key
-    region = "us-east-2"
-  }
+  subnet_ids = local.subnet_ids
 }
 
 data "template_file" "user_data" {
@@ -52,8 +34,8 @@ data "template_file" "user_data" {
 
   vars = {
     server_port = module.asg.server_port
-    db_address  = data.terraform_remote_state.db.outputs.address
-    db_port     = data.terraform_remote_state.db.outputs.port
+    db_address  = local.mysql_config.address
+    db_port     = local.mysql_config.port
     server_text = var.server_text
   }
 }
@@ -62,7 +44,7 @@ resource "aws_lb_target_group" "asg" {
   name     = "hello-world-${var.environment}"
   port     = module.asg.server_port
   protocol = "HTTP"
-  vpc_id   = data.aws_vpc.default.id
+  vpc_id   = local.vpc_id
 
   health_check {
     path                = "/"
